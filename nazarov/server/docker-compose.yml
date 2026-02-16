@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      dockerfile: ./docker/Dockerfile
+      dockerfile: "./docker/Dockerfile"
     environment:
       - "APP_HOST=0.0.0.0"
       - "APP_PORT=80"
