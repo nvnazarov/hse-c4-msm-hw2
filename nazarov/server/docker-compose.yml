@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      dockerfile: ./docker/Dockerfile
+    environment:
+      - "APP_HOST=0.0.0.0"
+      - "APP_PORT=80"
+      - "APP_SQLITE__DB=/tmp/app/storage.db"
+    ports:
+      - "127.0.0.1:${PORT:-8080}:80"
