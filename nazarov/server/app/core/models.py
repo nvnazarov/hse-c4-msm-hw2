@@ -63,6 +63,7 @@ class Run(BaseModel):
     def create(
         *,
         function_id: str,
+        name: str,
         n_agents: int,
         n_dims: int,
         max_steps: int,
@@ -72,7 +73,7 @@ class Run(BaseModel):
         id = uuid4().hex
         return Run(
             id=id,
-            name="untitled",
+            name=name or "untitled",
             state_id=None,
             function_id=function_id,
             n_agents=n_agents,

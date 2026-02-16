@@ -1,0 +1,18 @@
+.runs-list {
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  display: flex;
+  max-width: fit-content;
+}
+
+.runs-list > table {
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.runs-list > th, td {
+  border: 1px solid black;
+  padding: 2px;
+  text-align: center;
+}

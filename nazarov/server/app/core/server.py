@@ -81,6 +81,7 @@ class Server:
         self,
         *,
         function_id: str,
+        name: str,
         n_agents: int,
         n_dims: int,
         max_steps: int,
@@ -90,6 +91,7 @@ class Server:
         async with self.storage as tx:
             run = Run.create(
                 function_id=function_id,
+                name=name,
                 n_agents=n_agents,
                 n_dims=n_dims,
                 max_steps=max_steps,

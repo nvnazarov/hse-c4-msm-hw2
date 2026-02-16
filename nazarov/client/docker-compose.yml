@@ -1,0 +1,8 @@
+services:
+  client:
+    build:
+      dockerfile: "./docker/Dockerfile.${MOD:-dev}"
+    volumes:
+      - "./src:/app/src"
+    ports:
+      - "127.0.0.1:${PORT:-3000}:3000"

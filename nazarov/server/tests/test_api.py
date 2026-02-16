@@ -48,6 +48,7 @@ async def test_api(client: AsyncClient):
         "/runs",
         json={
             "function_id": "1",
+            "name": "test",
             "n_agents": 5,
             "n_dims": 2,
             "max_steps": 10,
@@ -58,6 +59,7 @@ async def test_api(client: AsyncClient):
     assert resp.status_code == 201
     run = resp.json()
     assert run["function_id"] == "1"
+    assert run["name"] == "test"
     assert run["n_agents"] == 5
     assert run["n_dims"] == 2
     assert run["max_steps"] == 10

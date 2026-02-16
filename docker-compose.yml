@@ -2,26 +2,29 @@ services:
   server:
     build:
       context: "./nazarov/server"
-      dockerfile: "./nazarov/server/docker/Dockerfile"
+      dockerfile: "./docker/Dockerfile.${MOD:-dev}"
     environment:
       - "APP_HOST=0.0.0.0"
       - "APP_PORT=80"
       - "APP_SQLITE__DB=/tmp/app/storage.db"
-    networks:
-      - "private"
+    volumes:
+      - "storage:/tmp/app"
+    ports:
+      - "127.0.0.1:8080:80"
 
   client:
     build:
       context: "./nazarov/client"
-      dockerfile: "./nazarov/client/docker/Dockerfile"
+      dockerfile: "./docker/Dockerfile.${MOD:-dev}"
     environment:
-      - "APP_HOST=0.0.0.0"
-      - "APP_PORT=80"
       - "APP_API_BASE_URL=http://server:80/api"
+    volumes:
+      - "./nazarov/client/src:/app/src"
     ports:
-      - "127.0.0.1:${PORT:-3000}:80"
-    networks:
-      - "private"
+      - "127.0.0.1:${PORT:-3000}:3000"
 
 networks:
   private: {}
+
+volumes:
+  storage: {}

@@ -1,0 +1,136 @@
+import { ChangeEvent, MouseEvent, useState } from "react";
+import { SelectFunction } from "../function";
+import "./CreateRunForm.css";
+import { useAppDispatch } from "../../app/hooks";
+import { createRun } from "./runSlice";
+
+const DEFAULT_LOW = -5;
+const DEFAULT_UP = 5;
+
+export function CreateRunForm() {
+  const dispatch = useAppDispatch();
+  const [busy, setBusy] = useState(false);
+  const [functionId, setFunctionId] = useState("");
+  const [name, setName] = useState("");
+  const [dimensions, setDimensions] = useState(1);
+  const [agents, setAgents] = useState(1);
+  const [maxSteps, setMaxSteps] = useState(100);
+  const [low, setLow] = useState<number[]>([-DEFAULT_LOW]);
+  const [up, setUp] = useState<number[]>([DEFAULT_UP]);
+
+  async function handleSubmit(e: MouseEvent<HTMLButtonElement>) {
+    try {
+      setBusy(true);
+      await dispatch(
+        createRun({
+          function_id: functionId,
+          name,
+          n_agents: agents,
+          n_dims: dimensions,
+          max_steps: maxSteps,
+          low: low,
+          up: up,
+        }),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function changeDimensions(e: ChangeEvent<HTMLInputElement>) {
+    const d = +e.target.value;
+    if (d < 1) {
+      return;
+    }
+    setDimensions(d);
+    if (low.length < d) {
+      setLow(
+        [...Array(d)].map((_, i) => (i < low.length ? low[i] : DEFAULT_LOW)),
+      );
+      setUp([...Array(d)].map((_, i) => (i < up.length ? up[i] : DEFAULT_UP)));
+    } else {
+      setLow(low.slice(0, d));
+      setUp(up.slice(0, d));
+    }
+  }
+
+  function changeDimLow(e: ChangeEvent<HTMLInputElement>, idx: number) {
+    const v = +e.target.value;
+    setLow(low.map((x, i) => (i === idx ? v : x)));
+  }
+
+  function changeDimUp(e: ChangeEvent<HTMLInputElement>, idx: number) {
+    const v = +e.target.value;
+    setUp(up.map((x, i) => (i === idx ? v : x)));
+  }
+
+  function changeAgents(e: ChangeEvent<HTMLInputElement>) {
+    const v = +e.target.value;
+    if (v < 1) {
+      return;
+    }
+    setAgents(v);
+  }
+
+  function changeMaxSteps(e: ChangeEvent<HTMLInputElement>) {
+    const v = +e.target.value;
+    if (v < 1) {
+      return;
+    }
+    setMaxSteps(v);
+  }
+
+  return (
+    <form className="create-run-form">
+      <p>Create new run</p>
+      <input
+        type="text"
+        placeholder="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="dimensions"
+        value={dimensions}
+        onChange={changeDimensions}
+      />
+      <input
+        type="number"
+        placeholder="agents"
+        value={agents}
+        onChange={changeAgents}
+      />
+      <input
+        type="number"
+        placeholder="max steps"
+        value={maxSteps}
+        onChange={changeMaxSteps}
+      />
+      <SelectFunction
+        value={functionId}
+        onChange={(e) => setFunctionId(e.target.value)}
+      />
+      <p>Set limits:</p>
+      {[...Array(dimensions)].map((_, idx) => (
+        <div key={idx} className="create-run-form__dim">
+          <input
+            type="number"
+            placeholder={`a${idx + 1} min`}
+            value={low[idx]}
+            onChange={(e) => changeDimLow(e, idx)}
+          />
+          <input
+            type="number"
+            placeholder={`a${idx + 1} max`}
+            value={up[idx]}
+            onChange={(e) => changeDimUp(e, idx)}
+          />
+        </div>
+      ))}
+      <button type="submit" onClick={handleSubmit} disabled={busy}>
+        Create
+      </button>
+    </form>
+  );
+}

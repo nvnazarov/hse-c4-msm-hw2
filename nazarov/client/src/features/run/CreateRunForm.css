@@ -1,0 +1,18 @@
+.create-run-form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 200px;
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.create-run-form__dim {
+  display: flex;
+  justify-content: space-between;
+}
+
+.create-run-form__dim > input {
+  max-width: 90px;
+}

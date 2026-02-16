@@ -1,0 +1,12 @@
+.runner {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  gap: 5px;
+}
+.runner__actions {
+  display: flex;
+  gap: 5px;
+}

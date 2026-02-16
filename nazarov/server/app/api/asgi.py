@@ -15,6 +15,7 @@ from app.core.server import (
 
 class CreateRunPayload(BaseModel):
     function_id: str
+    name: str
     n_agents: int = Field(ge=1)
     n_dims: int = Field(ge=1)
     max_steps: int = Field(ge=1)

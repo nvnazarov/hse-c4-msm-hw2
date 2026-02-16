@@ -244,7 +244,7 @@ class SqliteStorage(Storage):
         connection.execute("PRAGMA foreign_keys = ON")
         cursor = connection.cursor()
         cursor.execute(
-            "CREATE TABLE runs("
+            "CREATE TABLE IF NOT EXISTS runs("
             "   id              TEXT PRIMARY KEY, "
             "   name            TEXT NOT NULL, "
             "   state_id        TEXT, "
@@ -259,7 +259,7 @@ class SqliteStorage(Storage):
             ")"
         )
         cursor.execute(
-            "CREATE TABLE states("
+            "CREATE TABLE IF NOT EXISTS states("
             "   id              TEXT PRIMARY KEY, "
             "   run_id          TEXT NOT NULL, "
             "   step            INTEGER NOT NULL, "
@@ -271,8 +271,12 @@ class SqliteStorage(Storage):
             "   UNIQUE(run_id, step)"
             ")"
         )
-        cursor.execute("CREATE INDEX idx_runs_created_at ON runs(created_at)")
-        cursor.execute("CREATE INDEX idx_states_run_id_step ON states(run_id, step)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_states_run_id_step ON states(run_id, step)"
+        )
         cursor.close()
         connection.commit()
         return storage

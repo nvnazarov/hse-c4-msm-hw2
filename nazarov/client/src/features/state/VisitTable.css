@@ -1,0 +1,16 @@
+.visit-table {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 5px;
+  max-width: fit-content;
+}
+
+.visit-table > table {
+  border-collapse: collapse;
+}
+
+.visit-table > th, td {
+  border: 1px solid black;
+  padding: 1px;
+  text-align: center;
+}

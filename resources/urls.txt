@@ -1,0 +1,7 @@
+https://create-react-app.dev/docs/getting-started/
+https://www.chartjs.org/docs/latest/
+https://redux.js.org/
+https://fastapi.tiangolo.com/
+https://docs.pytest.org/en/stable/
+https://numpy.org/
+https://www.docker.com/
