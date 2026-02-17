@@ -19,5 +19,9 @@ export function DeleteRunButton({ id }: Props) {
     }
   }
 
-  return <button onClick={handleClick}>Delete</button>;
+  return (
+    <button onClick={handleClick} disabled={busy}>
+      Delete
+    </button>
+  );
 }

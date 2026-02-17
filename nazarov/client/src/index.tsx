@@ -1,10 +1,10 @@
+import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
 import { router } from "./app/router";
 import { store } from "./app/store";
 import { Provider } from "react-redux";
-import "./index.css";
 import { RouterProvider } from "react-router-dom";
 
 const container = document.getElementById("root")!;

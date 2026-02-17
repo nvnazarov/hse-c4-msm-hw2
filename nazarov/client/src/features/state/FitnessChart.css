@@ -1,0 +1,19 @@
+.fitness-chart {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 5px;
+  width: 500px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.fitness-chart hr {
+  width: 100%;
+}
+
+.fitness-chart div {
+  width: 100%;
+}

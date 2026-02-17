@@ -1,18 +1,40 @@
 .runs-list {
-  border: 1px solid black;
+  border: 2px solid black;
   padding: 5px;
   border-radius: 5px;
   display: flex;
+  flex-direction: column;
+  gap: 5px;
   max-width: fit-content;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
-.runs-list > table {
+.runs-list__pending {
+  background-color: #ddd;
+  transition-duration: 0.2s;
+}
+
+.runs-list table {
   border-collapse: collapse;
   border: 1px solid black;
 }
 
-.runs-list > th, td {
+.runs-list th {
+  padding: 10px;
   border: 1px solid black;
-  padding: 2px;
   text-align: center;
+}
+
+.runs-list td {
+  padding: 1px 4px;
+  border: 1px solid black;
+  text-align: left;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+}
+
+.runs-list caption {
+  margin-bottom: 4px;
 }

@@ -15,7 +15,7 @@ export function CreateRunForm() {
   const [dimensions, setDimensions] = useState(1);
   const [agents, setAgents] = useState(1);
   const [maxSteps, setMaxSteps] = useState(100);
-  const [low, setLow] = useState<number[]>([-DEFAULT_LOW]);
+  const [low, setLow] = useState<number[]>([DEFAULT_LOW]);
   const [up, setUp] = useState<number[]>([DEFAULT_UP]);
 
   async function handleSubmit(e: MouseEvent<HTMLButtonElement>) {
@@ -56,11 +56,17 @@ export function CreateRunForm() {
 
   function changeDimLow(e: ChangeEvent<HTMLInputElement>, idx: number) {
     const v = +e.target.value;
+    if (v > up[idx]) {
+      return;
+    }
     setLow(low.map((x, i) => (i === idx ? v : x)));
   }
 
   function changeDimUp(e: ChangeEvent<HTMLInputElement>, idx: number) {
     const v = +e.target.value;
+    if (v < low[idx]) {
+      return;
+    }
     setUp(up.map((x, i) => (i === idx ? v : x)));
   }
 
@@ -82,52 +88,63 @@ export function CreateRunForm() {
 
   return (
     <form className="create-run-form">
-      <p>Create new run</p>
-      <input
-        type="text"
-        placeholder="name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="dimensions"
-        value={dimensions}
-        onChange={changeDimensions}
-      />
-      <input
-        type="number"
-        placeholder="agents"
-        value={agents}
-        onChange={changeAgents}
-      />
-      <input
-        type="number"
-        placeholder="max steps"
-        value={maxSteps}
-        onChange={changeMaxSteps}
-      />
-      <SelectFunction
-        value={functionId}
-        onChange={(e) => setFunctionId(e.target.value)}
-      />
-      <p>Set limits:</p>
-      {[...Array(dimensions)].map((_, idx) => (
-        <div key={idx} className="create-run-form__dim">
-          <input
-            type="number"
-            placeholder={`a${idx + 1} min`}
-            value={low[idx]}
-            onChange={(e) => changeDimLow(e, idx)}
-          />
-          <input
-            type="number"
-            placeholder={`a${idx + 1} max`}
-            value={up[idx]}
-            onChange={(e) => changeDimUp(e, idx)}
-          />
-        </div>
-      ))}
+      <p>Create a new run.</p>
+      <hr />
+      <div className="create-run-form__form">
+        <p>Name:</p>
+        <input
+          type="text"
+          placeholder="untitled"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <p>Number of agents:</p>
+        <input
+          type="number"
+          placeholder="agents"
+          value={agents}
+          onChange={changeAgents}
+        />
+        <p>Max steps:</p>
+        <input
+          type="number"
+          placeholder="max steps"
+          value={maxSteps}
+          onChange={changeMaxSteps}
+        />
+        <p>Function:</p>
+        <SelectFunction
+          value={functionId}
+          onChange={(e) => setFunctionId(e.target.value)}
+        />
+        <p>Number of dimentions:</p>
+        <input
+          type="number"
+          placeholder="dimensions"
+          value={dimensions}
+          onChange={changeDimensions}
+        />
+        <p>Limits for dimensions:</p>
+        {[...Array(dimensions)].map((_, idx) => (
+          <div key={idx} className="create-run-form__dim">
+            <p>d{idx + 1}</p>
+            <input
+              type="number"
+              placeholder={`a${idx + 1} min`}
+              value={low[idx]}
+              onChange={(e) => changeDimLow(e, idx)}
+            />
+            <p>to</p>
+            <input
+              type="number"
+              placeholder={`a${idx + 1} max`}
+              value={up[idx]}
+              onChange={(e) => changeDimUp(e, idx)}
+            />
+          </div>
+        ))}
+      </div>
+      <hr />
       <button type="submit" onClick={handleSubmit} disabled={busy}>
         Create
       </button>

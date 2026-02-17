@@ -2,6 +2,7 @@ import {
   createAsyncThunk,
   createEntityAdapter,
   createSlice,
+  EntityState,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 
@@ -10,9 +11,11 @@ export interface Run {
   name: string;
   state_id: string;
   function_id: string;
-  visit_table: number[][];
-  agents: number[][];
-  fitness: number[];
+  max_steps: number;
+  n_agents: number;
+  n_dims: number;
+  low: number[];
+  up: number[];
   created_at: string;
 }
 
@@ -71,28 +74,60 @@ const runAdapter = createEntityAdapter<Run, string>({
   sortComparer: (a, b) => a.created_at.localeCompare(b.created_at),
 });
 
+interface RunsState extends EntityState<Run, string> {
+  status: "idle" | "pending" | "succeeded" | "rejected";
+}
+
+const initialState: RunsState = runAdapter.getInitialState({
+  status: "idle",
+});
+
 const runSlice = createSlice({
   name: "runs",
-  initialState: runAdapter.getInitialState(),
+  initialState: initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(createRun.fulfilled, (state, action) => {
         runAdapter.addOne(state, action.payload);
+        state.status = "succeeded";
+      })
+      .addCase(createRun.rejected, (state) => {
+        state.status = "rejected";
+      })
+      .addCase(createRun.pending, (state) => {
+        state.status = "pending";
       })
       .addCase(fetchRuns.fulfilled, (state, action) => {
         runAdapter.setAll(state, action.payload);
+        state.status = "succeeded";
+      })
+      .addCase(fetchRuns.rejected, (state) => {
+        state.status = "rejected";
+      })
+      .addCase(fetchRuns.pending, (state) => {
+        state.status = "pending";
       })
       .addCase(deleteRun.fulfilled, (state, action) => {
         runAdapter.removeOne(state, action.payload);
+        state.status = "succeeded";
+      })
+      .addCase(deleteRun.rejected, (state) => {
+        state.status = "rejected";
+      })
+      .addCase(deleteRun.pending, (state) => {
+        state.status = "pending";
       });
   },
 });
 
 const selectors = runAdapter.getSelectors<RootState>((state) => state.runs);
 
+export const selectStatus = (state: RootState) => state.runs.status;
 export const selectAllRuns = selectors.selectAll;
-export const selectRunById = (id: string) => (state: RootState) =>
-  selectors.selectById(state, id);
+export const selectRunById =
+  (id: string) =>
+  (state: RootState): Run | undefined =>
+    selectors.selectById(state, id);
 
 export default runSlice.reducer;

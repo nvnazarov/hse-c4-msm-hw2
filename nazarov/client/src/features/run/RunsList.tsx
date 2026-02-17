@@ -1,26 +1,36 @@
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { fetchRuns, selectAllRuns } from "./runSlice";
 import "./RunsList.css";
 import { Link } from "react-router-dom";
 import { DeleteRunButton } from "./DeleteRunButton";
+import moment from "moment";
+import { useAppSelector } from "../../app/hooks";
+import { selectAllRuns, selectStatus } from "./runSlice";
+import { selectAllFunctions } from "../function/functionSlice";
+import { RefreshRunsButton } from "./RefreshRunsButton";
 
 export function RunsList() {
-  const dispatch = useAppDispatch();
   const runs = useAppSelector(selectAllRuns);
-
-  useEffect(() => {
-    dispatch(fetchRuns());
-  }, [dispatch]);
+  const functions = useAppSelector(selectAllFunctions);
+  const status = useAppSelector(selectStatus);
 
   return (
-    <div className="runs-list">
+    <div
+      className={
+        "runs-list" + (status === "pending" ? " runs-list__pending" : "")
+      }
+    >
+      <p>
+        This is the list of all your runs. You can <RefreshRunsButton /> the
+        list.
+      </p>
+      <hr />
       <table>
-        <caption>Runs</caption>
         <thead>
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Function</th>
+            <th title="Number of agents">N</th>
+            <th title="Number of dimentions">D</th>
             <th>Created at</th>
             <th>Actions</th>
           </tr>
@@ -32,7 +42,10 @@ export function RunsList() {
                 <Link to={`/runs/${run.id}`}>{run.id.substring(0, 8)}</Link>
               </td>
               <td>{run.name}</td>
-              <td>{run.created_at}</td>
+              <td>{functions.find((f) => f.id === run.function_id)?.name}</td>
+              <td>{run.n_agents}</td>
+              <td>{run.n_dims}</td>
+              <td>{moment(run.created_at).format("DD.MM.YYYY hh:mm:ss")}</td>
               <td>
                 <DeleteRunButton id={run.id} />
               </td>

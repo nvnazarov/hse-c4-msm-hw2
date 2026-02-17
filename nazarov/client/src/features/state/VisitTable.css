@@ -3,13 +3,23 @@
   border-radius: 5px;
   padding: 5px;
   max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
 }
 
-.visit-table > table {
+.visit-table table {
+  border: 1px solid black;
   border-collapse: collapse;
 }
 
-.visit-table > th, td {
+.visit-table hr {
+  width: 100%;
+}
+
+.visit-table th,
+td {
   border: 1px solid black;
   padding: 1px;
   text-align: center;

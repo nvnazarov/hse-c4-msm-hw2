@@ -1,8 +1,8 @@
 import {
   createAsyncThunk,
   createEntityAdapter,
+  createSelector,
   createSlice,
-  isAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 
@@ -11,7 +11,7 @@ export interface State {
   run_id: string;
   step: number;
   visit_table: number[][];
-  agents: number[];
+  agents: number[][];
   fitness: number[];
   created_at: string;
 }
@@ -32,7 +32,7 @@ export const startRun = createAsyncThunk(
   "states/startRun",
   async (runId: string) => {
     const resp = await fetch(`http://localhost:8080/runs/${runId}/start`, {
-      method: "POST"
+      method: "POST",
     });
     if (!resp.ok) {
       throw new Error("failed to start the run");
@@ -97,17 +97,20 @@ const stateSlice = createSlice({
         stateAdapter.addMany(state, action.payload);
       })
       .addCase(fetchStatesForRun.fulfilled, (state, action) => {
-        stateAdapter.addMany(state, action.payload)
+        stateAdapter.addMany(state, action.payload);
       })
       .addCase(startRun.fulfilled, (state, action) => {
-        stateAdapter.addOne(state, action.payload)
-      })
+        stateAdapter.addOne(state, action.payload);
+      });
   },
 });
 
 const selectors = stateAdapter.getSelectors<RootState>((state) => state.states);
 
-export const selectStatesByRunId = (id: string) => (state: RootState) => selectors.selectAll(state).filter(s => s.run_id == id);
+export const selectStatesByRunId = createSelector(
+  [selectors.selectAll, (state, runId) => runId],
+  (states, runId) => states.filter((s) => s.run_id === runId),
+);
 export const selectStateById = (id: string) => (state: RootState) =>
   selectors.selectById(state, id);
 

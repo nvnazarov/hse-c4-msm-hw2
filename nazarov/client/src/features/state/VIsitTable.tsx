@@ -7,14 +7,15 @@ export interface Props {
 export function VisitTable({ vt }: Props) {
   return (
     <div className="visit-table">
+      <p>Visit table</p>
+      <hr />
       <table>
-        <caption>Visit Table</caption>
         <thead>
           <tr>
             <td></td>
             {vt.map((_, idx) => (
               <td key={idx}>
-                <b>x{idx}</b>
+                <b>x{idx + 1}</b>
               </td>
             ))}
           </tr>
@@ -23,7 +24,7 @@ export function VisitTable({ vt }: Props) {
           {vt.map((row, ri) => (
             <tr key={ri}>
               <td>
-                <b>x{ri}</b>
+                <b>x{ri + 1}</b>
               </td>
               {row.map((level, ci) => (
                 <td key={ci}>{ci === ri ? "-" : level}</td>
