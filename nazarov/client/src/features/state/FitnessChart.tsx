@@ -67,6 +67,21 @@ export function FitnessChart({ states }: Props) {
             enabled: true,
             forceOverride: true,
           },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const point = context.raw as any;
+                if (point.solution) {
+                  return [`Fitness: ${point.y}`, `Solution: ${point.solution}`];
+                } else {
+                  return [`Fitness: ${point.y}`];
+                }
+              },
+              title: function (context) {
+                return "Step " + (context[0].raw as any).x;
+              },
+            },
+          },
         },
       },
     });
@@ -91,6 +106,7 @@ export function FitnessChart({ states }: Props) {
       states.map((state, si) => ({
         x: si,
         y: state.fitness[ai],
+        solution: state.agents[ai],
       })),
     );
     chartRef.current.data.datasets = [

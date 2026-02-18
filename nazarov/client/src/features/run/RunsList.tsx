@@ -23,36 +23,38 @@ export function RunsList() {
         list.
       </p>
       <hr />
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Function</th>
-            <th title="Number of agents">N</th>
-            <th title="Number of dimentions">D</th>
-            <th>Created at</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {runs.map((run) => (
-            <tr key={run.id}>
-              <td title={run.id}>
-                <Link to={`/runs/${run.id}`}>{run.id.substring(0, 8)}</Link>
-              </td>
-              <td>{run.name}</td>
-              <td>{functions.find((f) => f.id === run.function_id)?.name}</td>
-              <td>{run.n_agents}</td>
-              <td>{run.n_dims}</td>
-              <td>{moment(run.created_at).format("DD.MM.YYYY hh:mm:ss")}</td>
-              <td>
-                <DeleteRunButton id={run.id} />
-              </td>
+      <div className="runs-list__table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Function</th>
+              <th title="Number of agents">N</th>
+              <th title="Number of dimentions">D</th>
+              <th>Created at</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {runs.map((run) => (
+              <tr key={run.id}>
+                <td title={run.id}>
+                  <Link to={`/runs/${run.id}`}>{run.id.substring(0, 8)}</Link>
+                </td>
+                <td>{run.name}</td>
+                <td>{functions.find((f) => f.id === run.function_id)?.name}</td>
+                <td>{run.n_agents}</td>
+                <td>{run.n_dims}</td>
+                <td>{moment(run.created_at).format("DD.MM.YYYY hh:mm:ss")}</td>
+                <td>
+                  <DeleteRunButton id={run.id} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

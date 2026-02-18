@@ -10,3 +10,7 @@ button {
   padding: 0px 10px;
   font-size: 1em;
 }
+
+::-webkit-scrollbar {
+  width: 0px;
+}

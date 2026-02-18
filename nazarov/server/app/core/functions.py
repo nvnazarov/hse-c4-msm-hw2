@@ -20,20 +20,3 @@ def rastrigin(x: FoodSource):
 def stepint(x: FoodSource):
     return 25 + np.sum(np.floor(x))
 
-
-def rosenbrok(a: np.float64, b: np.float64):
-    """A Rosenbrok function implementation
-
-    The global minimum is inside a long, narrow, parabolic-shaped flat valley.
-    To find the valley is trivial. To converge to the global minimum, however,
-    is difficult.
-
-    The global minimum is at (a, a*a).
-    """
-
-    def fitness_function(x: FoodSource):
-        if x.shape != (2,):
-            raise ValueError("Number of dimensions must be 2 for Rosenbrok function")
-        return (a - x[0]) ** 2 + b * (x[1] - x[0] ** 2) ** 2
-
-    return fitness_function

@@ -36,8 +36,7 @@ async def test_api(client: AsyncClient):
     assert resp.status_code == 200
     assert resp.json() == [
         {"id": "1", "name": "rastrigin"},
-        {"id": "2", "name": "rosenbrok"},
-        {"id": "3", "name": "stepint"},
+        {"id": "2", "name": "stepint"},
     ]
 
     resp = await client.get("/runs")

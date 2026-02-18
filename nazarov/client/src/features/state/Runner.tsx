@@ -9,9 +9,11 @@ import {
   startRun,
 } from "./stateSlice";
 import { VisitTable } from "./VIsitTable";
-import { selectRunById } from "../run/runSlice";
+import { selectRunById, selectStatus } from "../run/runSlice";
 import { FitnessChart } from "./FitnessChart";
 import { AgentsChart } from "./AgentsChart";
+import { Navigate } from "react-router-dom";
+import { selectAllFunctions } from "../function/functionSlice";
 
 export interface Props {
   runId: string;
@@ -19,13 +21,15 @@ export interface Props {
 
 export function Runner({ runId }: Props) {
   const dispatch = useAppDispatch();
+  const functions = useAppSelector(selectAllFunctions);
   const run = useAppSelector(selectRunById(runId));
+  const runsStatus = useAppSelector(selectStatus);
   const states = useAppSelector((state) => selectStatesByRunId(state, runId));
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    async function prefetch() {
+    async function fetchStates() {
       try {
         setBusy(true);
         await dispatch(fetchStatesForRun(runId));
@@ -33,7 +37,7 @@ export function Runner({ runId }: Props) {
         setBusy(false);
       }
     }
-    prefetch();
+    fetchStates();
   }, [dispatch, runId]);
 
   async function handleStartClick(e: any) {
@@ -48,7 +52,9 @@ export function Runner({ runId }: Props) {
   async function handleStepClick(e: any) {
     try {
       setBusy(true);
-      await dispatch(doStep(runId)).then(() => setStep(step + 1));
+      await dispatch(doStep(runId))
+        .unwrap()
+        .then((state) => setStep(state.step));
     } finally {
       setBusy(false);
     }
@@ -57,7 +63,13 @@ export function Runner({ runId }: Props) {
   async function handleRunUntilFinishClick(e: any) {
     try {
       setBusy(true);
-      await dispatch(runUntilFinish(runId));
+      await dispatch(runUntilFinish(runId))
+        .unwrap()
+        .then((states) => {
+          if (states.length > 0) {
+            setStep(states[states.length - 1].step);
+          }
+        });
     } finally {
       setBusy(false);
     }
@@ -68,6 +80,9 @@ export function Runner({ runId }: Props) {
   }
 
   function handleForwardClick(e: any) {
+    if (step >= states.length - 1) {
+      return;
+    }
     setStep(step + 1);
   }
 
@@ -76,8 +91,8 @@ export function Runner({ runId }: Props) {
       return;
     }
     let v = +e.target.value;
-    if (v >= run.max_steps) {
-      v = run.max_steps;
+    if (v >= states.length) {
+      v = states.length - 1;
     }
     if (v < 0) {
       v = 0;
@@ -85,42 +100,51 @@ export function Runner({ runId }: Props) {
     setStep(v);
   }
 
+  if (runsStatus === "succeeded" && run === undefined) {
+    return <Navigate to="/" />;
+  }
+
+  if (run === undefined) {
+    return <div className="runner">Loading.</div>;
+  }
+
   const isStarted = states.length > 0;
   const state = isStarted ? states[step] : undefined;
-  const lastState = states.find((state) => state.id === run?.state_id);
-  const isMaxStepsReached = lastState?.step === run?.max_steps;
+  const isMaxStepsReached = states.length > 0 && states[states.length - 1].step === run.max_steps;
+  const canForward = step < states.length - 1;
+  const canStep = isStarted && !isMaxStepsReached && !busy;
 
   return (
-    <div className="runner">
+    <div className={"runner" + (busy ? " runner__pending" : "")}>
       <p>
-        Run "{run?.name}" ({runId.slice(0, 8)})
+        Run "{run.name}" ({run.id.slice(0, 8)})
       </p>
       <hr />
       <div className="runner__actions">
         <button
           onClick={handleStartClick}
           disabled={isStarted || busy}
-          title={isStarted ? "run is already started" : undefined}
+          title={isStarted ? "Run is already started" : undefined}
         >
           Start
         </button>
         <button
           onClick={handleStepClick}
-          disabled={!isStarted || isMaxStepsReached || busy}
-          title={isMaxStepsReached ? "max steps reached" : undefined}
+          disabled={!canStep}
+          title={isMaxStepsReached ? "Max steps reached" : undefined}
         >
           Step
         </button>
         <button
           onClick={handleRunUntilFinishClick}
           disabled={!isStarted || isMaxStepsReached || busy}
-          title={isMaxStepsReached ? "max steps reached" : undefined}
+          title={isMaxStepsReached ? "Max steps reached" : undefined}
         >
           Run until finish
         </button>
         <button
           onClick={handleBackwardClick}
-          title="backward"
+          title="Backward"
           disabled={busy || step === 0}
         >
           {"<<"}
@@ -132,8 +156,8 @@ export function Runner({ runId }: Props) {
         />
         <button
           onClick={handleForwardClick}
-          title="forward"
-          disabled={busy || step === run?.max_steps}
+          title="Forward"
+          disabled={busy || !canForward}
         >
           {">>"}
         </button>
@@ -141,14 +165,15 @@ export function Runner({ runId }: Props) {
       <hr />
       {run && (
         <>
-          Agents: {run.n_agents}; Dimensions: {run.n_dims}; Function: {}
+          Agents: {run.n_agents}; Dimensions: {run.n_dims}; Function:{" "}
+          {functions.find((f) => f.id === run.function_id)?.name}
         </>
       )}
       <hr />
       <div className="runner__subplots">
-        {isStarted && <VisitTable vt={state!.visit_table} />}
+        {state && <VisitTable vt={state.visit_table} />}
         <FitnessChart states={states} />
-        {run && <AgentsChart run={run} step={step} states={states} />}
+        <AgentsChart run={run} step={step} states={states} />
       </div>
     </div>
   );

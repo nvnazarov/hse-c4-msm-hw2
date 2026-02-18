@@ -1,8 +1,8 @@
-import { ChangeEvent, MouseEvent, useState } from "react";
-import { SelectFunction } from "../function";
+import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import "./CreateRunForm.css";
-import { useAppDispatch } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { createRun } from "./runSlice";
+import { selectAllFunctions } from "../function/functionSlice";
 
 const DEFAULT_LOW = -5;
 const DEFAULT_UP = 5;
@@ -10,15 +10,25 @@ const DEFAULT_UP = 5;
 export function CreateRunForm() {
   const dispatch = useAppDispatch();
   const [busy, setBusy] = useState(false);
-  const [functionId, setFunctionId] = useState("");
+  const [functionId, setFunctionId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [dimensions, setDimensions] = useState(1);
   const [agents, setAgents] = useState(1);
   const [maxSteps, setMaxSteps] = useState(100);
   const [low, setLow] = useState<number[]>([DEFAULT_LOW]);
   const [up, setUp] = useState<number[]>([DEFAULT_UP]);
+  const functions = useAppSelector(selectAllFunctions);
+
+  useEffect(() => {
+    if (functions.length > 0) {
+      setFunctionId(functions[0].id);
+    }
+  }, [functions]);
 
   async function handleSubmit(e: MouseEvent<HTMLButtonElement>) {
+    if (functionId === null) {
+      return;
+    }
     try {
       setBusy(true);
       await dispatch(
@@ -87,7 +97,9 @@ export function CreateRunForm() {
   }
 
   return (
-    <form className="create-run-form">
+    <form
+      className={"create-run-form" + (busy ? " create-run-form__pending" : "")}
+    >
       <p>Create a new run.</p>
       <hr />
       <div className="create-run-form__form">
@@ -113,10 +125,18 @@ export function CreateRunForm() {
           onChange={changeMaxSteps}
         />
         <p>Function:</p>
-        <SelectFunction
-          value={functionId}
-          onChange={(e) => setFunctionId(e.target.value)}
-        />
+        {functionId && (
+          <select
+            value={functionId}
+            onChange={(e) => setFunctionId(e.target.value)}
+          >
+            {functions.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+        )}
         <p>Number of dimentions:</p>
         <input
           type="number"

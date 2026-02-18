@@ -9,6 +9,11 @@
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
+.runs-list__table {
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
 .runs-list__pending {
   background-color: #ddd;
   transition-duration: 0.2s;

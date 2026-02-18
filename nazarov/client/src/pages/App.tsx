@@ -14,7 +14,7 @@ export function App() {
   useEffect(() => {
     dispatch(fetchRuns());
     dispatch(fetchFunctions());
-  });
+  }, [dispatch]);
 
   return (
     <div className="app">
