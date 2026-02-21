@@ -3,6 +3,7 @@ from typing import Any
 
 from app.core.aha import AHA, VisitTable, to_food_source
 from app.core.models import Function, Run, State
+from app.core.functions import compute_mesh
 
 
 class RunNotFoundError(Exception): ...
@@ -204,3 +205,26 @@ class Server:
     async def get_all_functions(self) -> list[Function]:
         async with self.storage as tx:
             return await tx.functions.all()
+
+    async def get_function_mesh(
+        self,
+        id: str,
+        dims: list[float | None],
+        low: list[float],
+        up: list[float],
+        steps: list[int],
+    ):
+        async with self.storage as tx:
+            function = await tx.functions.get(id)
+            if not function:
+                raise FunctionNotFoundError
+            m = compute_mesh(function.f, dims, low, up, steps)
+            return m
+
+    async def eval_function(self, id: str, dims: list[float]) -> float:
+        async with self.storage as tx:
+            function = await tx.functions.get(id)
+            if not function:
+                raise FunctionNotFoundError
+            result = function.f(to_food_source(dims))
+            return float(result)

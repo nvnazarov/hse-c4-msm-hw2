@@ -39,6 +39,17 @@ async def test_api(client: AsyncClient):
         {"id": "2", "name": "stepint"},
     ]
 
+    resp = await client.post("/functions/1/eval", json={"dims": [1, 1, 1]})
+    assert resp.status_code == 200
+    assert resp.json() == 3
+
+    resp = await client.post(
+        "/functions/1/mesh",
+        json={"dims": [None, 1], "low": [0, 0], "up": [1, 1], "steps": [2, 2]},
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [1.0, 2.0]
+
     resp = await client.get("/runs")
     assert resp.status_code == 200
     assert resp.json() == []
