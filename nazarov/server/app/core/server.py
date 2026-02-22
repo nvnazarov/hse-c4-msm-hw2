@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from app.core.aha import AHA, VisitTable, to_food_source
-from app.core.models import Function, Run, State
 from app.core.functions import compute_mesh
+from app.core.models import Function, Run, State
 
 
 class RunNotFoundError(Exception): ...

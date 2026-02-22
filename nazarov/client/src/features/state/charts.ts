@@ -22,8 +22,10 @@ export const meshPlugin: Plugin = {
     const yScale = scales.y!;
     const xStep = (xMax - xMin) / xSteps;
     const yStep = (yMax - yMin) / ySteps;
-    const w = xScale.getPixelForValue(xMin + xStep) - xScale.getPixelForValue(xMin);
-    const h = yScale.getPixelForValue(yMin + yStep) - yScale.getPixelForValue(yMin);
+    const w =
+      xScale.getPixelForValue(xMin + xStep) - xScale.getPixelForValue(xMin);
+    const h =
+      yScale.getPixelForValue(yMin + yStep) - yScale.getPixelForValue(yMin);
     for (let x = 0; x < xSteps; ++x) {
       for (let y = 0; y <= ySteps - 1; ++y) {
         const fitness = (grid[x][y] - minFitness) / (maxFitness - minFitness);
@@ -57,7 +59,7 @@ export const agentsPlugin: Plugin = {
       const px = xScale.getPixelForValue(agent[d1]!);
       const py = yScale.getPixelForValue(agent[d2]!);
       ctx.fillStyle = `black`;
-      ctx.fillText(`x${idx + 1}`, px + 10, py)
-    })
-  }
+      ctx.fillText(`x${idx + 1}`, px + 10, py);
+    });
+  },
 };

@@ -1,6 +1,6 @@
 import numpy as np
 
-from app.core.aha import FoodSource, FitnessFunction
+from app.core.aha import FitnessFunction, FoodSource
 
 
 def rastrigin(x: FoodSource):

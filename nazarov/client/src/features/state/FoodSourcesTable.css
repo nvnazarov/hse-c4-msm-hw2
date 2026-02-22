@@ -24,6 +24,6 @@ td {
   padding: 1px;
   text-align: center;
   max-width: 60px;
-  text-overflow:clip;
+  text-overflow: clip;
   overflow: hidden;
 }

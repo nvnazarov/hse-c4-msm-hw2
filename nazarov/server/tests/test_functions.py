@@ -1,5 +1,6 @@
-from app.core.functions import rastrigin, compute_mesh
 import numpy as np
+
+from app.core.functions import compute_mesh, rastrigin
 
 
 def test_rastrigin():
@@ -13,7 +14,9 @@ def test_rastrigin():
 
 
 def test_compute_mesh():
-    mesh = compute_mesh(rastrigin, [None, 1, None], [0, 0, 0], [5, 5, 5], steps=[6, 6, 6])
+    mesh = compute_mesh(
+        rastrigin, [None, 1, None], [0, 0, 0], [5, 5, 5], steps=[6, 6, 6]
+    )
     assert mesh == [
         [1, 2, 5, 10, 17, 26],
         [2, 3, 6, 11, 18, 27],

@@ -19,7 +19,9 @@ export function FoodSourcesTable({ state }: Props) {
                 <b>d{idx + 1}</b>
               </td>
             ))}
-            <td title="Fitness Value"><b>F</b></td>
+            <td title="Fitness Value">
+              <b>F</b>
+            </td>
           </tr>
         </thead>
         <tbody>
@@ -33,7 +35,9 @@ export function FoodSourcesTable({ state }: Props) {
                   {dim.toFixed(2)}
                 </td>
               ))}
-              <td title={state.fitness[idx]!.toString()}>{state.fitness[idx]}</td>
+              <td title={state.fitness[idx]!.toString()}>
+                {state.fitness[idx]}
+              </td>
             </tr>
           ))}
         </tbody>
