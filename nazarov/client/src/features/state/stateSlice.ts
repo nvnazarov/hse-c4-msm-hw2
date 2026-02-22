@@ -5,6 +5,7 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
+import { API_BASE_URL } from "../../config";
 
 export interface State {
   id: string;
@@ -19,7 +20,7 @@ export interface State {
 export const fetchStatesForRun = createAsyncThunk(
   "states/fetchForRun",
   async (runId: string) => {
-    const resp = await fetch(`http://localhost:8080/runs/${runId}/states`);
+    const resp = await fetch(`${API_BASE_URL}/runs/${runId}/states`);
     if (!resp.ok) {
       throw new Error("failed to load states");
     }
@@ -31,7 +32,7 @@ export const fetchStatesForRun = createAsyncThunk(
 export const startRun = createAsyncThunk(
   "states/startRun",
   async (runId: string) => {
-    const resp = await fetch(`http://localhost:8080/runs/${runId}/start`, {
+    const resp = await fetch(`${API_BASE_URL}/runs/${runId}/start`, {
       method: "POST",
     });
     if (!resp.ok) {
@@ -45,7 +46,7 @@ export const startRun = createAsyncThunk(
 export const doStep = createAsyncThunk(
   "states/doStep",
   async (runId: string) => {
-    const resp = await fetch(`http://localhost:8080/runs/${runId}/step`, {
+    const resp = await fetch(`${API_BASE_URL}/runs/${runId}/step`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +64,7 @@ export const runUntilFinish = createAsyncThunk(
   "states/runUntilFinish",
   async (runId: string) => {
     const resp = await fetch(
-      `http://localhost:8080/runs/${runId}/run-until-finish`,
+      `${API_BASE_URL}/runs/${runId}/run-until-finish`,
       {
         method: "POST",
         headers: {

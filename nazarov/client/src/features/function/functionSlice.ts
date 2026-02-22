@@ -4,6 +4,7 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
+import { API_BASE_URL } from "../../config";
 
 export interface Function {
   id: string;
@@ -13,7 +14,7 @@ export interface Function {
 export const fetchFunctions = createAsyncThunk(
   "functions/fetchFunctions",
   async () => {
-    const resp = await fetch("http://localhost:8080/functions");
+    const resp = await fetch(`${API_BASE_URL}/functions`);
     if (!resp.ok) {
       throw new Error("failed to fetch functions");
     }

@@ -5,6 +5,7 @@ import {
   EntityState,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
+import { API_BASE_URL } from "../../config";
 
 export interface Run {
   id: string;
@@ -32,7 +33,7 @@ export interface CreateRunPaylaod {
 export const createRun = createAsyncThunk(
   "runs/createRun",
   async (payload: CreateRunPaylaod) => {
-    const resp = await fetch("http://localhost:8080/runs", {
+    const resp = await fetch(`${API_BASE_URL}/runs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -48,7 +49,7 @@ export const createRun = createAsyncThunk(
 );
 
 export const fetchRuns = createAsyncThunk("runs/fetchRuns", async () => {
-  const resp = await fetch("http://localhost:8080/runs");
+  const resp = await fetch(`${API_BASE_URL}/runs`);
   if (!resp.ok) {
     throw new Error("failed to fetch runs");
   }
@@ -59,7 +60,7 @@ export const fetchRuns = createAsyncThunk("runs/fetchRuns", async () => {
 export const deleteRun = createAsyncThunk(
   "runs/deleteRun",
   async (id: string) => {
-    const resp = await fetch(`http://localhost:8080/runs/${id}`, {
+    const resp = await fetch(`${API_BASE_URL}/runs/${id}`, {
       method: "DELETE",
     });
     if (!resp.ok) {

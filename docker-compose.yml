@@ -17,14 +17,11 @@ services:
       context: "./nazarov/client"
       dockerfile: "./docker/Dockerfile.${MOD:-dev}"
     environment:
-      - "APP_API_BASE_URL=http://server:80/api"
+      - "APP_API_BASE_URL=http://server:80"
     volumes:
       - "./nazarov/client/src:/app/src"
     ports:
       - "127.0.0.1:${PORT:-3000}:3000"
-
-networks:
-  private: {}
 
 volumes:
   storage: {}
