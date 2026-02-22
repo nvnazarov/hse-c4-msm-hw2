@@ -78,7 +78,8 @@ export function FitnessChart({ states }: Props) {
                 }
               },
               title: function (context) {
-                return "Step " + (context[0].raw as any).x;
+                if (context.length < 0) return;
+                return "Step " + (context[0]!.raw as any).x;
               },
             },
           },
@@ -101,12 +102,12 @@ export function FitnessChart({ states }: Props) {
       return;
     }
 
-    const n = states[0].agents.length;
+    const n = states[0]!.agents.length;
     const dataPerAgent = [...Array(n)].map((_, ai) =>
       states.map((state, si) => ({
         x: si,
-        y: state.fitness[ai],
-        solution: state.agents[ai],
+        y: state.fitness[ai]!,
+        solution: state.agents[ai]!,
       })),
     );
     chartRef.current.data.datasets = [
@@ -120,7 +121,7 @@ export function FitnessChart({ states }: Props) {
         tension: 0.1,
       },
       ...dataPerAgent.map((dpa, ai) => {
-        return { label: "x" + ai, data: dpa, fill: false, tension: 0.1 };
+        return { label: "x" + (ai + 1), data: dpa, fill: false, tension: 0.1 };
       }),
     ];
 
@@ -129,7 +130,7 @@ export function FitnessChart({ states }: Props) {
 
   return (
     <div className="fitness-chart">
-      <p>Fitness per agent</p>
+      <p>Fitness by Agent</p>
       <hr />
       <div>
         <canvas ref={canvasRef}></canvas>

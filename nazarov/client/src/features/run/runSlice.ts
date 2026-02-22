@@ -127,7 +127,7 @@ export const selectStatus = (state: RootState) => state.runs.status;
 export const selectAllRuns = selectors.selectAll;
 export const selectRunById =
   (id: string) =>
-  (state: RootState): Run | undefined =>
-    selectors.selectById(state, id);
+    (state: RootState) =>
+      selectors.selectById(state, id);
 
 export default runSlice.reducer;

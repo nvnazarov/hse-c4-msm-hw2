@@ -7,7 +7,7 @@ export interface Props {
 export function VisitTable({ vt }: Props) {
   return (
     <div className="visit-table">
-      <p>Visit table</p>
+      <p>Visit Table</p>
       <hr />
       <table>
         <thead>

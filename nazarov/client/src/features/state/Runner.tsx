@@ -14,6 +14,7 @@ import { FitnessChart } from "./FitnessChart";
 import { AgentsChart } from "./AgentsChart";
 import { Navigate } from "react-router-dom";
 import { selectAllFunctions } from "../function/functionSlice";
+import { FoodSourcesTable } from "./FoodSourcesTable";
 
 export interface Props {
   runId: string;
@@ -40,7 +41,7 @@ export function Runner({ runId }: Props) {
     fetchStates();
   }, [dispatch, runId]);
 
-  async function handleStartClick(e: any) {
+  async function handleStartClick() {
     try {
       setBusy(true);
       await dispatch(startRun(runId));
@@ -49,7 +50,7 @@ export function Runner({ runId }: Props) {
     }
   }
 
-  async function handleStepClick(e: any) {
+  async function handleStepClick() {
     try {
       setBusy(true);
       await dispatch(doStep(runId))
@@ -67,7 +68,7 @@ export function Runner({ runId }: Props) {
         .unwrap()
         .then((states) => {
           if (states.length > 0) {
-            setStep(states[states.length - 1].step);
+            setStep(states[states.length - 1]!.step);
           }
         });
     } finally {
@@ -110,7 +111,8 @@ export function Runner({ runId }: Props) {
 
   const isStarted = states.length > 0;
   const state = isStarted ? states[step] : undefined;
-  const isMaxStepsReached = states.length > 0 && states[states.length - 1].step === run.max_steps;
+  const isMaxStepsReached =
+    states.length > 0 && states[states.length - 1]!.step === run.max_steps;
   const canForward = step < states.length - 1;
   const canStep = isStarted && !isMaxStepsReached && !busy;
 
@@ -172,6 +174,7 @@ export function Runner({ runId }: Props) {
       <hr />
       <div className="runner__subplots">
         {state && <VisitTable vt={state.visit_table} />}
+        {state && <FoodSourcesTable state={state} />}
         <FitnessChart states={states} />
         <AgentsChart run={run} step={step} states={states} />
       </div>

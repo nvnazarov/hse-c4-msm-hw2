@@ -3,6 +3,7 @@ import "./AgentsChart.css";
 import { State } from "./stateSlice";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Run } from "../run/runSlice";
+import { meshPlugin } from "./charts";
 
 Chart.register(ScatterController);
 
@@ -14,19 +15,26 @@ export interface Props {
 
 export function AgentsChart({ step, states, run }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const colorbarRef = useRef<HTMLCanvasElement | null>(null);
   const chartRef = useRef<Chart | null>(null);
-  const [selectedDims, setSelectedDims] = useState<boolean[]>(
-    [...Array(run.n_dims)].map((_) => false),
-  );
-  const [slidersValues, setSlidersValues] = useState<number[]>(
-    [...Array(run.n_dims)].map((_) => run.low[0]),
-  );
+  const [selectedDims, setSelectedDims] = useState<boolean[]>([]);
+  const [slidersValues, setSlidersValues] = useState<number[]>([]);
+  const [LOD, setLOD] = useState<number>(100);
+  const [minFitness, setMinFitness] = useState(0);
+  const [maxFitness, setMaxFitness] = useState(100);
 
+  // Update aside settings when run changes.
   useEffect(() => {
+    if (run.n_dims !== run.low.length) {
+      throw Error(
+        "the number of run dimensions is not equal to the number of low dimensions",
+      );
+    }
     setSelectedDims([...Array(run.n_dims)].map((_) => false));
-    setSlidersValues([...Array(run.n_dims)].map((_) => run.low[0]));
-  }, [run]);
+    setSlidersValues([...Array(run.n_dims)].map((_, idx) => run.low[idx]!));
+  }, [run.id]);
 
+  // Create a chart when canvas changes.
   useEffect(() => {
     if (!canvasRef.current) return;
     const existingChart = Chart.getChart(canvasRef.current);
@@ -58,8 +66,7 @@ export function AgentsChart({ step, states, run }: Props) {
         },
         plugins: {
           colors: {
-            enabled: true,
-            forceOverride: true,
+            enabled: false,
           },
           legend: {
             labels: {
@@ -67,13 +74,16 @@ export function AgentsChart({ step, states, run }: Props) {
                 if (legendItem.datasetIndex === undefined) {
                   return false;
                 }
-                const dataset = chartData.datasets[legendItem.datasetIndex] as any;
+                const dataset = chartData.datasets[
+                  legendItem.datasetIndex
+                ] as any;
                 return dataset.hideFromLegend !== true;
               },
             },
           },
         },
       },
+      plugins: [meshPlugin],
     });
     chartRef.current = chart;
     return () => {
@@ -82,6 +92,84 @@ export function AgentsChart({ step, states, run }: Props) {
     };
   }, [canvasRef]);
 
+  // Update colorbar.
+  useEffect(() => {
+    if (!colorbarRef.current) return;
+    const canvas = colorbarRef.current 
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const gradient = ctx.createLinearGradient(0, 0, 100, 0);
+    for (let i = 0; i <= 100; i++) {
+      const t = i / 100;
+      const hue = (1 - (t + 1) / 2) * 240;
+      gradient.addColorStop(t, `hsl(${hue}, 100%, 50%)`);
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 100, 20);
+  }, [colorbarRef]);
+
+  // Update chart: background.
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const chart = chartRef.current;
+
+    const d1 = selectedDims.indexOf(true);
+    const d2 = selectedDims.lastIndexOf(true);
+    if (d1 === -1 || d2 === -1 || d1 === d2) {
+      return;
+    }
+
+    const steps = LOD;
+
+    fetch(`http://localhost:8080/functions/${run.function_id}/mesh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        dims: slidersValues.map((v, i) => (selectedDims[i] ? null : v)),
+        low: run.low,
+        up: run.up,
+        steps: run.low.map((_) => steps),
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((json) => {
+        let minFitness = Number.MAX_VALUE;
+        let maxFitness = Number.MIN_VALUE;
+        for (let row of json as number[][]) {
+          for (let elem of row) {
+            minFitness = Math.min(minFitness, elem);
+            maxFitness = Math.max(maxFitness, elem);
+          }
+        }
+        setMinFitness(minFitness);
+        setMaxFitness(maxFitness);
+
+        chart.options.plugins!.mesh = {
+          grid: json,
+          xMin: run.low[d1],
+          xMax: run.up[d1],
+          xSteps: steps,
+          yMin: run.low[d2],
+          yMax: run.up[d2],
+          ySteps: steps,
+        };
+        chart.update();
+      });
+  }, [
+    run.id,
+    run.function_id,
+    run.low,
+    run.up,
+    LOD,
+    selectedDims,
+    slidersValues,
+  ]);
+
+  // Update chart: agents positions.
   useEffect(() => {
     if (!chartRef.current) return;
     const chart = chartRef.current;
@@ -120,8 +208,9 @@ export function AgentsChart({ step, states, run }: Props) {
       {
         label: "Current Positions",
         data: state.agents.map((pos, ai) => {
-          return { x: pos[d1], y: pos[d2], r: state.fitness[ai] };
+          return { x: pos[d1]!, y: pos[d2]!, r: state.fitness[ai] };
         }),
+        borderColor: "black",
       },
     ];
     if (prevState) {
@@ -130,19 +219,21 @@ export function AgentsChart({ step, states, run }: Props) {
         {
           label: "Old Positions",
           data: prevState.agents.map((pos, ai) => {
-            return { x: pos[d1], y: pos[d2], r: state.fitness[ai] };
+            return { x: pos[d1]!, y: pos[d2]!, r: state.fitness[ai] };
           }),
         },
         ...prevState.agents.map((prevPos, ai) => {
-          const currPos = state.agents[ai];
+          const currPos = state.agents[ai]!;
           return {
             data: [
-              { x: prevPos[d1], y: prevPos[d2] },
-              { x: currPos[d1], y: currPos[d2] },
+              { x: prevPos[d1]!, y: prevPos[d2]! },
+              { x: currPos[d1]!, y: currPos[d2]! },
             ],
             showLine: true,
-            borderColor: "blue",
-            borderWidth: 2,
+            borderColor: "black",
+            borderWidth: 1,
+            borderDash: [5, 5],
+            borderDashOffset: 0,
             pointRadius: 0,
             hideFromLegend: true,
           };
@@ -153,7 +244,6 @@ export function AgentsChart({ step, states, run }: Props) {
   }, [run, step, states, selectedDims, chartRef]);
 
   function handleDimCheckToggle(e: ChangeEvent<HTMLInputElement>, idx: number) {
-    e.preventDefault();
     setSelectedDims(
       selectedDims.map((v, i) => (i === idx ? e.target.checked : v)),
     );
@@ -172,20 +262,28 @@ export function AgentsChart({ step, states, run }: Props) {
   ) {
     e.preventDefault();
     let t = +e.target.value;
-    if (t < run.low[idx]) {
-      t = run.low[idx];
+    if (t < run.low[idx]!) {
+      t = run.low[idx]!;
     }
-    if (t > run.up[idx]) {
-      t = run.up[idx];
+    if (t > run.up[idx]!) {
+      t = run.up[idx]!;
     }
     setSlidersValues(slidersValues.map((v, i) => (i === idx ? t : v)));
+  }
+
+  function handleLODChange(e: ChangeEvent<HTMLInputElement>) {
+    let v = +e.target.value;
+    if (v < 1) {
+      v = 1;
+    }
+    setLOD(+e.target.value);
   }
 
   const canSelectDims = selectedDims.filter((v) => v).length < 2;
 
   return (
     <div className="agents-chart">
-      <p>Agents movement</p>
+      <p>Agents</p>
       <hr />
       <div className="agents-chart__body">
         <div className="agents-chart__canvas">
@@ -205,7 +303,7 @@ export function AgentsChart({ step, states, run }: Props) {
               <p>d{di + 1}</p>
               <input
                 type="number"
-                value={selectedDims[di] ? undefined : slidersValues[di]}
+                value={slidersValues[di]}
                 onChange={(e) => handleSliderValueChange(e, di)}
                 disabled={selectedDims[di]}
               />
@@ -221,6 +319,20 @@ export function AgentsChart({ step, states, run }: Props) {
               <p>{run.up[di]}</p>
             </div>
           ))}
+          <hr />
+          <p>Level of detail (LOD):</p>
+          <input
+            type="number"
+            value={LOD}
+            onChange={(e) => handleLODChange(e)}
+          />
+          <hr />
+          <p>Fitness colorbar:</p>
+          <canvas ref={colorbarRef} width={100} height={20}></canvas>
+          <div className="agents-chart__colorbar-scale">
+            <p>{minFitness.toFixed(2)}</p>
+            <p>{maxFitness.toFixed(2)}</p>
+          </div>
         </div>
       </div>
     </div>

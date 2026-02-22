@@ -20,9 +20,15 @@ export function CreateRunForm() {
   const functions = useAppSelector(selectAllFunctions);
 
   useEffect(() => {
-    if (functions.length > 0) {
-      setFunctionId(functions[0].id);
+    if (functions.length === 0) {
+      setFunctionId(null);
+      return;
     }
+    if (functions.find((f) => f.id === functionId)) {
+      return;
+    }
+    setFunctionId(functions[0]!.id);
+    return;
   }, [functions]);
 
   async function handleSubmit(e: MouseEvent<HTMLButtonElement>) {
@@ -55,9 +61,9 @@ export function CreateRunForm() {
     setDimensions(d);
     if (low.length < d) {
       setLow(
-        [...Array(d)].map((_, i) => (i < low.length ? low[i] : DEFAULT_LOW)),
+        [...Array(d)].map((_, i) => (i < low.length ? low[i]! : DEFAULT_LOW)),
       );
-      setUp([...Array(d)].map((_, i) => (i < up.length ? up[i] : DEFAULT_UP)));
+      setUp([...Array(d)].map((_, i) => (i < up.length ? up[i]! : DEFAULT_UP)));
     } else {
       setLow(low.slice(0, d));
       setUp(up.slice(0, d));
@@ -66,7 +72,7 @@ export function CreateRunForm() {
 
   function changeDimLow(e: ChangeEvent<HTMLInputElement>, idx: number) {
     const v = +e.target.value;
-    if (v > up[idx]) {
+    if (up.length <= idx || v > up[idx]!) {
       return;
     }
     setLow(low.map((x, i) => (i === idx ? v : x)));
@@ -74,7 +80,7 @@ export function CreateRunForm() {
 
   function changeDimUp(e: ChangeEvent<HTMLInputElement>, idx: number) {
     const v = +e.target.value;
-    if (v < low[idx]) {
+    if (low.length <= idx || v < low[idx]!) {
       return;
     }
     setUp(up.map((x, i) => (i === idx ? v : x)));

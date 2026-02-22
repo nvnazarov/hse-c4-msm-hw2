@@ -10,7 +10,7 @@ export function DeleteRunButton({ id }: Props) {
   const dispatch = useAppDispatch();
   const [busy, setBusy] = useState(false);
 
-  async function handleClick(e: any) {
+  async function handleClick() {
     try {
       setBusy(true);
       await dispatch(deleteRun(id));

@@ -1,0 +1,29 @@
+.food-sources-table {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 5px;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.food-sources-table table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.food-sources-table hr {
+  width: 100%;
+}
+
+.food-sources-table th,
+td {
+  border: 1px solid black;
+  padding: 1px;
+  text-align: center;
+  max-width: 60px;
+  text-overflow:clip;
+  overflow: hidden;
+}
