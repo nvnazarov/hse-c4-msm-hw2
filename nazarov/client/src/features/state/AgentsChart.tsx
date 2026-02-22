@@ -310,6 +310,7 @@ export function AgentsChart({ step, states, run }: Props) {
               <p>{run.low[di]}</p>
               <input
                 type="range"
+                step="0.01"
                 min={run.low[di]}
                 max={run.up[di]}
                 value={slidersValues[di]}

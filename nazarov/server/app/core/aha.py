@@ -239,7 +239,7 @@ class Hummingbird:
     def territorial_foraging(self):
         d = self.direction_switch_vector()
         b = np.random.normal(0, 1, (self._d,))
-        candidate_food_source = self._food_source + b * d * (self._up - self._low)
+        candidate_food_source = self._food_source + b * d * self._food_source
         candidate_food_source = np.clip(candidate_food_source, self._low, self._up)
         if (fv := self._fitness_function(candidate_food_source)) < self._fitness_value:
             self._food_source = candidate_food_source

@@ -30,7 +30,7 @@ export function FoodSourcesTable({ state }: Props) {
               </td>
               {agent.map((dim, dimIdx) => (
                 <td key={dimIdx} title={dim.toString()}>
-                  {dim}
+                  {dim.toFixed(2)}
                 </td>
               ))}
               <td title={state.fitness[idx]!.toString()}>{state.fitness[idx]}</td>
