@@ -5,7 +5,7 @@
   border: 1px solid black;
   border-radius: 5px;
   padding: 5px;
-  width: 700px;
+  width: 740px;
   height: 400px;
   align-items: center;
 }
@@ -55,4 +55,19 @@
 .agents-chart__colorbar-scale {
   display: flex;
   justify-content: space-between;
+}
+
+.agents-chart__sliders table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.agents-chart__sliders th,
+td {
+  max-width: 60px;
+  text-overflow: clip;
+  overflow: hidden;
+  border: 1px solid black;
+  padding: 1px;
+  text-align: center;
 }

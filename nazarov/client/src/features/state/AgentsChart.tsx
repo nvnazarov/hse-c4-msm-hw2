@@ -4,6 +4,7 @@ import { State } from "./stateSlice";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Run } from "../run/runSlice";
 import { agentsPlugin, meshPlugin } from "./charts";
+import { API_BASE_URL } from "../../config";
 
 Chart.register(ScatterController);
 
@@ -22,6 +23,10 @@ export function AgentsChart({ step, states, run }: Props) {
   const [LOD, setLOD] = useState<number>(100);
   const [minFitness, setMinFitness] = useState(0);
   const [maxFitness, setMaxFitness] = useState(100);
+  const [mouseDims, setMouseDims] = useState<number[]>([]);
+  const [mouseFitness, setMouseFitness] = useState<number>(0);
+  const oldMouseDims = useRef<number[]>([]);
+  const newMouseDims = useRef<number[]>([]);
 
   // Update aside settings when run changes.
   useEffect(() => {
@@ -30,8 +35,40 @@ export function AgentsChart({ step, states, run }: Props) {
         "the number of run dimensions is not equal to the number of low dimensions",
       );
     }
-    setSelectedDims([...Array(run.n_dims)].map((_) => false));
-    setSlidersValues([...Array(run.n_dims)].map((_, idx) => run.low[idx]!));
+    const tmp = [...Array(run.n_dims)];
+    setSelectedDims(tmp.map((_) => false));
+    setSlidersValues(tmp.map((_, idx) => run.low[idx]!));
+    setMouseDims(tmp.map((_) => 0));
+    oldMouseDims.current = tmp.map((_) => 0);
+    newMouseDims.current = tmp.map((_) => 0);
+
+    const timer = setInterval(() => {
+      if (
+        oldMouseDims.current.find((v, i) => v !== newMouseDims.current[i]!) !==
+        undefined
+      ) {
+        oldMouseDims.current = [...newMouseDims.current];
+        fetch(`${API_BASE_URL}/functions/${run.function_id}/eval`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dims: newMouseDims.current,
+          }),
+        })
+          .then((resp) => {
+            if (resp.status !== 200) {
+              return;
+            }
+            return resp.json();
+          })
+          .then((json) => {
+            setMouseFitness(json);
+          });
+      }
+    }, 500);
+    return () => {
+      clearInterval(timer);
+    };
   }, [run.id]);
 
   // Create a chart when canvas changes.
@@ -99,7 +136,7 @@ export function AgentsChart({ step, states, run }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const gradient = ctx.createLinearGradient(0, 0, 100, 0);
+    const gradient = ctx.createLinearGradient(0, 0, 260, 0);
     for (let i = 0; i <= 100; i++) {
       const t = i / 100;
       const hue = (1 - (t + 1) / 2) * 240;
@@ -107,7 +144,7 @@ export function AgentsChart({ step, states, run }: Props) {
     }
 
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 100, 20);
+    ctx.fillRect(0, 0, 260, 20);
   }, [colorbarRef]);
 
   // Update chart: background.
@@ -248,6 +285,25 @@ export function AgentsChart({ step, states, run }: Props) {
     chart.update();
   }, [run, step, states, selectedDims, chartRef]);
 
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const chart = chartRef.current;
+    const d1 = selectedDims.indexOf(true);
+    const d2 = selectedDims.lastIndexOf(true);
+    if (d1 === -1 || d2 === -1 || d1 === d2) {
+      return;
+    }
+    chart.canvas.onpointermove = (e) => {
+      const x = chart.scales.x!.getValueForPixel(e.offsetX)!;
+      const y = chart.scales.y!.getValueForPixel(e.offsetY)!;
+      const dims = slidersValues.map((v, i) =>
+        i === d1 ? x : i === d2 ? y : v,
+      );
+      setMouseDims(dims);
+      newMouseDims.current = dims;
+    };
+  }, [chartRef, slidersValues, selectedDims, run.function_id]);
+
   function handleDimCheckToggle(e: ChangeEvent<HTMLInputElement>, idx: number) {
     setSelectedDims(
       selectedDims.map((v, i) => (i === idx ? e.target.checked : v)),
@@ -334,10 +390,39 @@ export function AgentsChart({ step, states, run }: Props) {
           />
           <hr />
           <p>Fitness colorbar:</p>
-          <canvas ref={colorbarRef} width={100} height={20}></canvas>
+          <div>
+            <canvas ref={colorbarRef} width={260} height={20}></canvas>
+          </div>
           <div className="agents-chart__colorbar-scale">
             <p>{minFitness.toFixed(2)}</p>
             <p>{maxFitness.toFixed(2)}</p>
+          </div>
+          <hr />
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  {mouseDims.map((_, i) => (
+                    <th key={i}>
+                      <b>d{i + 1}</b>
+                    </th>
+                  ))}
+                  <th>
+                    <b>F</b>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  {mouseDims.map((d, i) => (
+                    <td key={i} title={d.toString()}>
+                      {d.toFixed(2)}
+                    </td>
+                  ))}
+                  <td>{mouseFitness}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
