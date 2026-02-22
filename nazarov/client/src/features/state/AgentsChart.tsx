@@ -3,7 +3,7 @@ import "./AgentsChart.css";
 import { State } from "./stateSlice";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Run } from "../run/runSlice";
-import { meshPlugin } from "./charts";
+import { agentsPlugin, meshPlugin } from "./charts";
 
 Chart.register(ScatterController);
 
@@ -83,7 +83,7 @@ export function AgentsChart({ step, states, run }: Props) {
           },
         },
       },
-      plugins: [meshPlugin],
+      plugins: [meshPlugin, agentsPlugin],
     });
     chartRef.current = chart;
     return () => {
@@ -95,7 +95,7 @@ export function AgentsChart({ step, states, run }: Props) {
   // Update colorbar.
   useEffect(() => {
     if (!colorbarRef.current) return;
-    const canvas = colorbarRef.current 
+    const canvas = colorbarRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -240,6 +240,11 @@ export function AgentsChart({ step, states, run }: Props) {
         }),
       ];
     }
+    chart.options.plugins!.agents = {
+      agents: state.agents,
+      d1: d1,
+      d2: d2,
+    };
     chart.update();
   }, [run, step, states, selectedDims, chartRef]);
 

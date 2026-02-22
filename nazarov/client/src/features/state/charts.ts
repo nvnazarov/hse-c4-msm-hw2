@@ -38,3 +38,26 @@ export const meshPlugin: Plugin = {
     }
   },
 };
+
+export const agentsPlugin: Plugin = {
+  id: "agents",
+  afterDraw(chart: Chart, args: any, options: any) {
+    const { agents, d1, d2 } = options as {
+      agents?: number[][];
+      d1?: number;
+      d2?: number;
+    };
+    if (!agents || d1 === undefined || d2 === undefined) {
+      return;
+    }
+    const { ctx, scales } = chart;
+    const xScale = scales.x!;
+    const yScale = scales.y!;
+    agents.forEach((agent, idx) => {
+      const px = xScale.getPixelForValue(agent[d1]!);
+      const py = yScale.getPixelForValue(agent[d2]!);
+      ctx.fillStyle = `black`;
+      ctx.fillText(`x${idx + 1}`, px + 10, py)
+    })
+  }
+};

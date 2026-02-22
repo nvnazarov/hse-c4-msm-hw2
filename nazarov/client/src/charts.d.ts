@@ -10,6 +10,11 @@ declare module "chart.js" {
       yMax?: number;
       xSteps?: number;
       ySteps?: number;
-    };
+    },
+    agents?: {
+      agents?: number[][];
+      d1?: number;
+      d2?: number;
+    },
   }
 }
